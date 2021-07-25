@@ -1,22 +1,11 @@
-package main
+package creator
 
 import (
 	"os"
 	"path"
-	"strings"
 )
 
 type Project struct {
-	Path string
-	Name string
-}
-
-type Middleware struct {
-	Path string
-	Name string
-}
-
-type Controller struct {
 	Path string
 	Name string
 }
@@ -51,7 +40,20 @@ func NewProject(name string) *Project {
 	os.Mkdir(path.Join(proj.Path, "app", "models"), 0755)
 	os.Mkdir(path.Join(proj.Path, "app", "routers"), 0755)
 
+	envFile, _ := os.Create(path.Join(proj.Path, "app", ".env"))
 	file, _ := os.Create(path.Join(proj.Path, "app", "main.go"))
+
+	envFile.WriteString(`
+# .env file
+
+PROJECT_NAME=` + name + `
+DATABASE=mysql
+DB_HOST=localhost
+DB_PORT=27017
+DB_USERNAME=admin
+DB_PASSWORD=password
+DB_NAME=testdb
+`)
 
 	file.WriteString(`package main
 
@@ -89,13 +91,21 @@ func Cors() gin.HandlerFunc {
 import (
 	"database/sql"
 	"log"
-
+	"github.com/joho/godotenv"
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func initDb() *gorp.DbMap {
-	db, err := sql.Open("mysql", "user:pass@tcp(localhost:3306)/database")
+	var projEnv map[string]string
+	projEnv, err := godotenv.Read()
+
+	if err != nil {
+		panic(".env file does not exist!")
+	}
+	
+	dbString := projEnv["DB_USERNAME"] + ":" + projEnv["DB_PASSWORD"] + "@tcp(" + projEnv["DB_HOST"] + ":" + projEnv["DB_PORT"] + ")/" + projEnv["DB_NAME"]
+	db, err := sql.Open(projEnv["DATABASE"], dbString)
 
 	if err != nil {
 		log.Fatalln(err, "sql.Open failed")
@@ -157,126 +167,4 @@ func createRouting() {
 
 	file.Close()
 	return proj
-}
-
-func (m *Middleware) Exists() bool {
-	folderPath, _ := os.Getwd()
-	middlewarePath := path.Join(folderPath, "middlewares")
-
-	_, err := os.Stat(middlewarePath)
-
-	if err != nil {
-		return false
-	}
-
-	m.Path = middlewarePath
-	return true
-}
-
-func NewMiddleware(name string) *Middleware {
-	middle := &Middleware{Name: name}
-	if !middle.Exists() {
-		panic("Middlewares folder not found!")
-	}
-
-	file, _ := os.Create(path.Join("middlewares", name+".go"))
-	file.WriteString(`package middlewares
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-func ` + name + `() gin.HandlerFunc {
-
-	return func(c *gin.Context) {
-
-		c.Next()
-
-	}
-
-}
-`)
-
-	return middle
-}
-
-func (c *Controller) Exists() bool {
-	folderPath, _ := os.Getwd()
-	controllerPath := path.Join(folderPath, "controllers")
-
-	_, err := os.Stat(controllerPath)
-
-	if err != nil {
-		return false
-	}
-
-	c.Path = controllerPath
-	return true
-}
-
-func NewController(name string) *Controller {
-	control := &Controller{Name: name}
-	if !control.Exists() {
-		panic("Controllers folder not found!")
-	}
-
-	file, _ := os.Create(path.Join("controllers", name+".go"))
-	file.WriteString(`package controllers
-
-import (
-	"github.com/gin-gonic/gin"
-)
-
-/*
-* Display a listing of the resource.
- */
-func index` + strings.Title(name) + `s(c *gin.Context) {
-	
-}
-
-/*
-* Store a newly created resource in storage.
- */
-func store` + strings.Title(name) + `(c *gin.Context) {
-	
-}
-
-/*
-* Display the specified resource.
- */
-func show` + strings.Title(name) + `(c *gin.Context) {
-	
-}
-
-/*
-* Update the specified resource in storage.
- */
-func update` + strings.Title(name) + `(c *gin.Context) {
-	
-}
-
-/*
-* Remove the specified resource from storage.
- */
-func destroy` + strings.Title(name) + `(c *gin.Context) {
-	
-}
-
-
-`)
-
-	return control
-}
-
-func Creator(args []string) {
-	switch strings.ToLower(args[0]) {
-	case "project":
-		NewProject(args[1])
-	case "middleware":
-		NewMiddleware(args[1])
-	case "controller":
-		NewController(args[1])
-	default:
-		panic("Invalid property to create: " + args[1])
-	}
 }
