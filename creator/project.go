@@ -3,6 +3,7 @@ package creator
 import (
 	"os"
 	"path"
+	"runtime"
 )
 
 type Project struct {
@@ -11,7 +12,7 @@ type Project struct {
 }
 
 func (p *Project) Exists() bool {
-	projPath := path.Join(os.Getenv("GOPATH"), "src", p.Name)
+	projPath := path.Join(p.Name)
 	_, err := os.Stat(projPath)
 
 	if err == nil {
@@ -31,7 +32,6 @@ func NewProject(name string) *Project {
 
 	os.Mkdir(proj.Path, 0755)
 	os.Mkdir(path.Join(proj.Path, "app"), 0755)
-	os.Mkdir(path.Join(proj.Path, "temp"), 0755)
 
 	// dentro da pasta App
 	os.Mkdir(path.Join(proj.Path, "app", "controllers"), 0755)
@@ -58,9 +58,9 @@ DB_NAME=testdb
 	file.WriteString(`package main
 
 import (
-	"` + proj.Name + `/app/database"
-	// "` + proj.Name + `/app/models"
-	"` + proj.Name + `/app/routers"
+	"github.com/local/database"
+	// "github.com/local/models"
+	"github.com/local/routers"
 )
 
 func main() {
@@ -135,8 +135,8 @@ var DBMap *gorp.DbMap
 	file.WriteString(`package routers
 
 import (
-	"` + proj.Name + `/app/controllers"
-	// "` + proj.Name + `/app/middlewares"
+	"github.com/local/controllers"
+	// "github.com/local//middlewares"
 
 	"github.com/gin-gonic/gin"
 )
@@ -163,6 +163,28 @@ func createRouting() {
 
 }
 		
+`)
+
+	// projPathOnGopath := path.Join(os.Getenv("GOPATH"), "src", "caip", name)
+	file, _ = os.Create(path.Join(proj.Path, "app", "go.mod"))
+	file.WriteString(`module app
+
+go ` + runtime.Version()[2:6] + `
+
+replace github.com/local => ./
+
+require (
+	github.com/gin-gonic/gin v1.7.4
+	github.com/go-gorp/gorp v2.2.0+incompatible
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/joho/godotenv v1.4.0
+	github.com/lib/pq v1.10.3 // indirect
+	github.com/local v0.0.0
+	github.com/mattn/go-sqlite3 v1.14.8 // indirect
+	github.com/poy/onpar v1.1.2 // indirect
+	github.com/ziutek/mymysql v1.5.4 // indirect
+)
+	
 `)
 
 	file.Close()

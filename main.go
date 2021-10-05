@@ -16,12 +16,17 @@ func main() {
 func ReadLine() {
 	args := os.Args[1:]
 
-	if strings.ToLower(args[0]) == "create" {
-		creator.Create(args[1:])
+	if len(args) < 2 {
+		panic("Invalid number of parameters")
 	}
 
-	if strings.ToLower(args[0]) == "run" {
+	switch strings.ToLower(args[0]) {
+	case "create":
+		creator.Create(args[1:])
+	case "run":
 		runner.Run(args[1:])
+	default:
+		panic("Invalid argument")
 	}
 }
 

@@ -10,7 +10,7 @@ import (
 
 func Run(info []string) {
 	projName := info[0]
-	projPath := path.Join(os.Getenv("GOPATH"), "src", projName)
+	projPath := path.Join(projName)
 	_, err := os.Stat(projPath)
 
 	if err != nil {

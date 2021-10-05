@@ -3,7 +3,6 @@ package creator
 import (
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
@@ -33,15 +32,15 @@ func NewModel(name string) *Model {
 		panic("Models folder not found!")
 	}
 
-	dir, _ := os.Getwd()
-	projName := filepath.Base(filepath.Dir(dir))
+	// dir, _ := os.Getwd()
+	// projName := filepath.Base(filepath.Dir(dir))
 
 	file, _ := os.Create(path.Join("models", name+".go"))
 	file.WriteString(`package models
 
 import (
 	"errors"
-	"` + projName + `/app/database"
+	"github.com/local/database"
 	"log"
 )
 
