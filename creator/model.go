@@ -48,8 +48,12 @@ type ` + strings.Title(name) + ` struct {
 	ID        int    ` + "`" + `db:"id, primarykey, autoincrement" json:"id"` + "`" + `
 }
 
+func init() {
+	Create` + strings.Title(name) + `Table()
+}
+
 func Create` + strings.Title(name) + `Table() {
-	database.DBMap.AddTableWithName(` + strings.Title(name) + `{}, " ` + name + `s")
+	database.DBMap.AddTableWithName(` + strings.Title(name) + `{}, "` + name + `s")
 
 	err := database.DBMap.CreateTablesIfNotExists()
 

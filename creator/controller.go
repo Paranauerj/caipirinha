@@ -41,35 +41,35 @@ import (
 /*
 * Display a listing of the resource.
  */
-func index` + strings.Title(name) + `s(c *gin.Context) {
+func Index` + strings.Title(name) + `s(c *gin.Context) {
 	
 }
 
 /*
 * Store a newly created resource in storage.
  */
-func store` + strings.Title(name) + `(c *gin.Context) {
+func Store` + strings.Title(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Display the specified resource.
  */
-func show` + strings.Title(name) + `(c *gin.Context) {
+func Show` + strings.Title(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Update the specified resource in storage.
  */
-func update` + strings.Title(name) + `(c *gin.Context) {
+func Update` + strings.Title(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Remove the specified resource from storage.
  */
-func destroy` + strings.Title(name) + `(c *gin.Context) {
+func Destroy` + strings.Title(name) + `(c *gin.Context) {
 	
 }
 

@@ -58,14 +58,10 @@ DB_NAME=testdb
 	file.WriteString(`package main
 
 import (
-	"github.com/local/database"
-	// "github.com/local/models"
 	"github.com/local/routers"
 )
 
 func main() {
-	database.StartDB()
-	// models.CreateUserTable()
 	routers.Router.Run(":8090")
 }
 `)
@@ -124,6 +120,10 @@ func initDb() *gorp.DbMap {
 
 func StartDB() {
 	DBMap = initDb()
+}
+
+func init() {
+	StartDB()
 }
 
 var DBMap *gorp.DbMap

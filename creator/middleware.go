@@ -3,6 +3,7 @@ package creator
 import (
 	"os"
 	"path"
+	"strings"
 )
 
 type Middleware struct {
@@ -37,7 +38,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ` + name + `() gin.HandlerFunc {
+func ` + strings.Title(name) + `() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
