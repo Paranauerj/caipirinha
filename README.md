@@ -27,6 +27,14 @@ To Install it:
 go get github.com/Paranauerj/caipirinha
 ```
 
+## Usage
+Generating things is really easy, just type:
+``` sh
+caipirinha create [option] name
+```
+
+The current options are **Project, Model, Controller and Middleware**
+
 ## Tech Stack
 
 Caipirinha is built on top of the following technologies
