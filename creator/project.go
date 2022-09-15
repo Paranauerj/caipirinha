@@ -31,23 +31,40 @@ func NewProject(name string) *Project {
 		panic("Project already exists")
 	}
 
-	os.Mkdir(proj.Path, 0755)
-	os.Mkdir(path.Join(proj.Path, "app"), 0755)
+	createFolders(proj.Path)
+
+	createEnvFile(proj.Path, proj.Name)
+	createMainFile(proj.Path)
+	createControllerCorsFile(proj.Path)
+
+	// To Run Dockerfile: docker build -t abc -f Dockerfile .
+	createDockerfile(proj.Path)
+	createRouterFile(proj.Path)
+	createDatabaseConnectionFile(proj.Path)
+	createAndUpdateModulesFile(proj.Path)
+
+	return proj
+}
+
+func createFolders(projectPath string) {
+	os.Mkdir(projectPath, 0755)
+	os.Mkdir(path.Join(projectPath, "app"), 0755)
 
 	// dentro da pasta App
-	os.Mkdir(path.Join(proj.Path, "app", "controllers"), 0755)
-	os.Mkdir(path.Join(proj.Path, "app", "database"), 0755)
-	os.Mkdir(path.Join(proj.Path, "app", "middlewares"), 0755)
-	os.Mkdir(path.Join(proj.Path, "app", "models"), 0755)
-	os.Mkdir(path.Join(proj.Path, "app", "routers"), 0755)
+	os.Mkdir(path.Join(projectPath, "app", "controllers"), 0755)
+	os.Mkdir(path.Join(projectPath, "app", "database"), 0755)
+	os.Mkdir(path.Join(projectPath, "app", "middlewares"), 0755)
+	os.Mkdir(path.Join(projectPath, "app", "models"), 0755)
+	os.Mkdir(path.Join(projectPath, "app", "routers"), 0755)
+}
 
-	envFile, _ := os.Create(path.Join(proj.Path, "app", ".env"))
-	file, _ := os.Create(path.Join(proj.Path, "app", "main.go"))
+func createEnvFile(projectPath string, projectName string) {
+	file, _ := os.Create(path.Join(projectPath, "app", ".env"))
 
-	envFile.WriteString(`
+	file.WriteString(`
 # .env file
 
-PROJECT_NAME=` + name + `
+PROJECT_NAME=` + projectName + `
 DATABASE=mysql
 DB_HOST=localhost
 DB_PORT=27017
@@ -55,7 +72,11 @@ DB_USERNAME=admin
 DB_PASSWORD=password
 DB_NAME=testdb
 `)
+	file.Close()
+}
 
+func createMainFile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "app", "main.go"))
 	file.WriteString(`package main
 
 import (
@@ -66,8 +87,11 @@ func main() {
 	routers.Router.Run(":8090")
 }
 `)
+	file.Close()
+}
 
-	file, _ = os.Create(path.Join(proj.Path, "app", "controllers", "controller.go"))
+func createControllerCorsFile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "app", "controllers", "controller.go"))
 
 	file.WriteString(`package controllers
 
@@ -81,7 +105,33 @@ func Cors() gin.HandlerFunc {
 }
 `)
 
-	file, _ = os.Create(path.Join(proj.Path, "app", "database", "conn.go"))
+	file.Close()
+}
+
+func createAndUpdateModulesFile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "app", "go.mod"))
+	file.WriteString(`module app
+
+go ` + runtime.Version()[2:6] + `
+
+
+replace github.com/local => ./
+
+	
+`)
+
+	file.Close()
+
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = path.Join(projectPath, "app")
+
+	if err := cmd.Start(); err != nil {
+		panic("Was not possible to start CMD")
+	}
+}
+
+func createDatabaseConnectionFile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "app", "database", "conn.go"))
 
 	file.WriteString(`package database
 
@@ -131,7 +181,12 @@ var DBMap *gorp.DbMap
 	
 `)
 
-	file, _ = os.Create(path.Join(proj.Path, "app", "routers", "api.go"))
+	file.Close()
+
+}
+
+func createRouterFile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "app", "routers", "api.go"))
 
 	file.WriteString(`package routers
 
@@ -166,26 +221,39 @@ func createRouting() {
 		
 `)
 
-	// projPathOnGopath := path.Join(os.Getenv("GOPATH"), "src", "caip", name)
-	file, _ = os.Create(path.Join(proj.Path, "app", "go.mod"))
-	file.WriteString(`module app
+	file.Close()
 
-go ` + runtime.Version()[2:6] + `
+}
+
+func createDockerfile(projectPath string) {
+	file, _ := os.Create(path.Join(projectPath, "Dockerfile"))
+
+	file.WriteString(`FROM golang:` + runtime.Version()[2:6] + `-alpine
+
+RUN apk add --no-cache git
+
+# Set the Current Working Directory inside the container
+WORKDIR /app/go-sample-app
+
+# We want to populate the module cache based on the go.{mod,sum} files.
+COPY app/go.mod .
+COPY app/go.sum .
+
+RUN go mod download
+
+COPY app/ .
+
+# Build the Go app
+RUN go build -o ./out/go-sample-app .
 
 
-replace github.com/local => ./
+# This container exposes port 8080 to the outside world
+EXPOSE 8090
 
-	
+# Run the binary program produced by 'go install'
+CMD ["./out/go-sample-app"]
 `)
 
 	file.Close()
 
-	cmd := exec.Command("go", "mod", "tidy")
-	cmd.Dir = path.Join(proj.Path, "app")
-
-	if err := cmd.Start(); err != nil {
-		panic("Was not possible to start CMD")
-	}
-
-	return proj
 }
