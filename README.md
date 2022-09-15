@@ -1,4 +1,7 @@
 # Caipirinha
+
+![alt text](https://miro.medium.com/max/250/1*KgxtxcL5vvC6jZMZa9CxQQ.png)
+
 ## The fastest code generator for Go APIs
 
 
