@@ -2,6 +2,7 @@ package creator
 
 import (
 	"os"
+	"os/exec"
 	"path"
 	"runtime"
 )
@@ -171,22 +172,20 @@ func createRouting() {
 
 go ` + runtime.Version()[2:6] + `
 
+
 replace github.com/local => ./
 
-require (
-	github.com/gin-gonic/gin v1.7.4
-	github.com/go-gorp/gorp v2.2.0+incompatible
-	github.com/go-sql-driver/mysql v1.6.0
-	github.com/joho/godotenv v1.4.0
-	github.com/lib/pq v1.10.3 // indirect
-	github.com/local v0.0.0
-	github.com/mattn/go-sqlite3 v1.14.8 // indirect
-	github.com/poy/onpar v1.1.2 // indirect
-	github.com/ziutek/mymysql v1.5.4 // indirect
-)
 	
 `)
 
 	file.Close()
+
+	cmd := exec.Command("go", "mod", "tidy")
+	cmd.Dir = path.Join(proj.Path, "app")
+
+	if err := cmd.Start(); err != nil {
+		panic("Was not possible to start CMD")
+	}
+
 	return proj
 }

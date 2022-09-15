@@ -3,7 +3,9 @@ package creator
 import (
 	"os"
 	"path"
-	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Middleware struct {
@@ -31,6 +33,8 @@ func NewMiddleware(name string) *Middleware {
 		panic("Middlewares folder not found!")
 	}
 
+	caser := cases.Title(language.English)
+
 	file, _ := os.Create(path.Join("middlewares", name+".go"))
 	file.WriteString(`package middlewares
 
@@ -38,7 +42,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ` + strings.Title(name) + `() gin.HandlerFunc {
+func ` + caser.String(name) + `() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 

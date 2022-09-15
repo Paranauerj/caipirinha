@@ -3,7 +3,9 @@ package creator
 import (
 	"os"
 	"path"
-	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Model struct {
@@ -32,6 +34,8 @@ func NewModel(name string) *Model {
 		panic("Models folder not found!")
 	}
 
+	caser := cases.Title(language.English)
+
 	// dir, _ := os.Getwd()
 	// projName := filepath.Base(filepath.Dir(dir))
 
@@ -44,16 +48,16 @@ import (
 	"log"
 )
 
-type ` + strings.Title(name) + ` struct {
+type ` + caser.String(name) + ` struct {
 	ID        int    ` + "`" + `db:"id, primarykey, autoincrement" json:"id"` + "`" + `
 }
 
 func init() {
-	Create` + strings.Title(name) + `Table()
+	Create` + caser.String(name) + `Table()
 }
 
-func Create` + strings.Title(name) + `Table() {
-	database.DBMap.AddTableWithName(` + strings.Title(name) + `{}, "` + name + `s")
+func Create` + caser.String(name) + `Table() {
+	database.DBMap.AddTableWithName(` + caser.String(name) + `{}, "` + name + `s")
 
 	err := database.DBMap.CreateTablesIfNotExists()
 
@@ -65,7 +69,7 @@ func Create` + strings.Title(name) + `Table() {
 }
 
 // Saves a new ` + name + `
-func (` + name + ` *` + strings.Title(name) + `) Save() error {
+func (` + name + ` *` + caser.String(name) + `) Save() error {
 	if database.DBMap.Insert(` + name + `) != nil {
 		return errors.New("an error has ocurred on saving a new ` + name + `")
 	}
@@ -74,18 +78,18 @@ func (` + name + ` *` + strings.Title(name) + `) Save() error {
 }
 
 // Lists all the ` + name + `
-func (` + name + ` ` + strings.Title(name) + `) List() ([]interface{}, error) {
+func (` + name + ` ` + caser.String(name) + `) List() ([]interface{}, error) {
 	return database.DBMap.Select(` + name + `, "select * from ` + name + `s")
 }
 
 // Get ` + name + ` by ID
-func (` + name + ` *` + strings.Title(name) + `) GetById() (interface{}, error) {
+func (` + name + ` *` + caser.String(name) + `) GetById() (interface{}, error) {
 	err := database.DBMap.SelectOne(&` + name + `, "select * from ` + name + `s where id = ?", ` + name + `.ID)
 	return ` + name + `, err
 }
 
 // Checks if ` + name + ` exists
-func (` + name + ` *` + strings.Title(name) + `) Exists() bool {
+func (` + name + ` *` + caser.String(name) + `) Exists() bool {
 	if _, err := ` + name + `.GetById(); err != nil {
 		return false
 	}
@@ -94,7 +98,7 @@ func (` + name + ` *` + strings.Title(name) + `) Exists() bool {
 
 }
 
-func (` + name + ` *` + strings.Title(name) + `) Delete() error {
+func (` + name + ` *` + caser.String(name) + `) Delete() error {
 	if !` + name + `.Exists() {
 		return errors.New("` + name + ` not found")
 	}

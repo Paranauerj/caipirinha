@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"myprojects/caipirinha/creator"
-	"myprojects/caipirinha/runner"
 	"os"
 	"strings"
+
+	"github.com/Paranauerj/caipirinha/creator"
+	"github.com/Paranauerj/caipirinha/runner"
 )
 
 func main() {

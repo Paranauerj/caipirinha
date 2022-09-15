@@ -3,7 +3,9 @@ package creator
 import (
 	"os"
 	"path"
-	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Controller struct {
@@ -31,6 +33,8 @@ func NewController(name string) *Controller {
 		panic("Controllers folder not found!")
 	}
 
+	caser := cases.Title(language.English)
+
 	file, _ := os.Create(path.Join("controllers", name+".go"))
 	file.WriteString(`package controllers
 
@@ -41,35 +45,35 @@ import (
 /*
 * Display a listing of the resource.
  */
-func Index` + strings.Title(name) + `s(c *gin.Context) {
+func Index` + caser.String(name) + `s(c *gin.Context) {
 	
 }
 
 /*
 * Store a newly created resource in storage.
  */
-func Store` + strings.Title(name) + `(c *gin.Context) {
+func Store` + caser.String(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Display the specified resource.
  */
-func Show` + strings.Title(name) + `(c *gin.Context) {
+func Show` + caser.String(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Update the specified resource in storage.
  */
-func Update` + strings.Title(name) + `(c *gin.Context) {
+func Update` + caser.String(name) + `(c *gin.Context) {
 	
 }
 
 /*
 * Remove the specified resource from storage.
  */
-func Destroy` + strings.Title(name) + `(c *gin.Context) {
+func Destroy` + caser.String(name) + `(c *gin.Context) {
 	
 }
 
